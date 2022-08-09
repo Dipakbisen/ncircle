@@ -1,5 +1,14 @@
 <template>
   <div class="main-list">
+    <button
+      id="openModal"
+      type="button"
+      class="btn btn-primary d-none"
+      data-bs-toggle="modal"
+      data-bs-target="#staticBackdrop"
+    >
+      Launch static backdrop modal
+    </button>
     <div class="grid" @mouseup="mouseup">
       <div class="column-left">
         <div v-for="(post, i) in postlist" :key="i" class="post-card">
@@ -59,6 +68,51 @@
         </span>
       </div>
     </div>
+
+    <!--  -->
+    <div
+      class="modal fade"
+      id="staticBackdrop"
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+      tabindex="-1"
+      aria-labelledby="staticBackdropLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="staticBackdropLabel">Selected Post</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div
+              v-for="(post, i) in selectedPosts"
+              :key="i"
+              v-html="post.content"
+              class="mb-5"
+              @click="viewSelectedPost(post.id)"
+            ></div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <!-- <button type="button" class="btn btn-primary" @click="closeModal"></button> -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--  -->
   </div>
 </template>
 
@@ -71,6 +125,8 @@ export default {
       showTools: false,
       x: 0,
       y: 0,
+      myModal: null,
+      selectedPosts: [],
     };
   },
   computed: {
@@ -82,14 +138,19 @@ export default {
   methods: {
     viewPost(id) {
       const text = window.getSelection().toString();
-      if (text || this.showTools) {
-        console.log(text, this.showTools);
-      } else {
+      if (!text || !this.showTools) {
         this.$router.push({
           path: "/view",
           query: { id: id },
         });
       }
+    },
+    viewSelectedPost(id) {
+      this.closeModal();
+      this.$router.push({
+        path: "/view",
+        query: { id: id },
+      });
     },
     editPost(id) {
       this.$router.push({
@@ -127,10 +188,31 @@ export default {
         this.y = event.y - event.target.offsetHeight;
         this.showTools = true;
       });
+      span.addEventListener("click", (event) => {
+        this.selectedPost(event.target.outerText);
+        document.getElementById("openModal").click();
+      });
       span.appendChild(selectedText);
       selection.insertNode(span);
       span.addEventListener("click", () => {
         this.showTools = true;
+      });
+    },
+    closeModal() {
+      document.getElementById("openModal").click();
+    },
+    selectedPost(value) {
+      this.selectedPosts = this.postlist.map((post) => {
+        const str = post.content.search(value);
+        if (str >= 0) {
+          const newContent = post.content.replace(
+            `${value.toString()}`,
+            `<span style="background:yellow;">${value.toString()}</span>`
+          );
+          return { ...post, content: newContent };
+        } else {
+          return null;
+        }
       });
     },
   },

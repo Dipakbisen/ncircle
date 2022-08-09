@@ -42,6 +42,9 @@ export default {
       this.$store.dispatch("selectedPost", query.id);
     }
   },
+  beforeDestroy() {
+    this.$store.dispatch("resetSelectedPost");
+  },
   methods: {
     goBack() {
       this.$router.push("/");

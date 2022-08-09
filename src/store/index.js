@@ -41,6 +41,9 @@ export default new Vuex.Store({
       const data = state.postList.find((post) => post.id == id);
       state.selectedPost = data;
     },
+    resetPost(state) {
+      state.selectedPost = {};
+    },
   },
   actions: {
     fetchInitalPost({ commit }) {
@@ -57,6 +60,9 @@ export default new Vuex.Store({
     },
     selectedPost({ commit }, id) {
       commit("setSelectedPost", id);
+    },
+    resetSelectedPost({ commit }) {
+      commit("resetPost");
     },
   },
   modules: {},
